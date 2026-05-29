@@ -1,0 +1,98 @@
+# =============================================================================
+# Epitranscriptome Pipeline Configuration
+# =============================================================================
+# Explainable AI for Detecting RNA Changes in Plasma-Treated Skin Cancer
+# Using Nanopore Sequencing
+# =============================================================================
+
+# --- Input BAM Files ---
+# Each condition has a name and path to its modification-aware BAM file.
+# Currently: 2 untreated conditions (normoxia vs hypoxia).
+# When plasma-treated data is available, add entries here.
+samples:
+  SCL-1_normoxia:
+    bam: "/mnt/e/SCL-1_normoxia/alignment/FBF49260_pass_d756e6ad_00000000_0.bam"
+    condition: "untreated"
+    oxygen: "normoxia"
+
+  SCL-1_hypoxia:
+    bam: "/mnt/e/SCL-1_hypoxia/alignment/FBF64598_pass_3ceea3a1_00000000_0.bam"
+    condition: "untreated"
+    oxygen: "hypoxia"
+
+  # --- Uncomment when plasma-treated data is available ---
+  # SCL-1_normoxia_plasma:
+  #   bam: "/path/to/plasma_normoxia.bam"
+  #   condition: "plasma_treated"
+  #   oxygen: "normoxia"
+  #
+  # SCL-1_hypoxia_plasma:
+  #   bam: "/path/to/plasma_hypoxia.bam"
+  #   condition: "plasma_treated"
+  #   oxygen: "hypoxia"
+
+# --- Comparison pairs for differential analysis ---
+# Each pair defines (control, treatment) sample names from above
+comparisons:
+  - control: "SCL-1_normoxia"
+    treatment: "SCL-1_hypoxia"
+  # - control: "SCL-1_normoxia"
+  #   treatment: "SCL-1_normoxia_plasma"
+  # - control: "SCL-1_hypoxia"
+  #   treatment: "SCL-1_hypoxia_plasma"
+
+# --- Modification types ---
+# m6A_DRACH Dorado model — only m6A is called
+modification_types:
+  - code: "a"
+    name: "m6A"
+    chebi: null
+
+# Focus modification for downstream analysis (m6A is most studied)
+primary_modification: "m6A"
+
+# --- Reference genome/transcriptome ---
+# Update this path to your reference file
+reference_fasta: "reference/GRCh38.primary_assembly.genome.fa"  # e.g., "/path/to/GRCh38.fa" or transcriptome FASTA
+gtf_annotation: "reference/gencode.v47.annotation.gtf"   # e.g., "/path/to/gencode.v44.annotation.gtf"
+
+# --- Thresholds ---
+thresholds:
+  # Probability threshold for calling a read as modified (0-255 scale)
+  modification_probability: 191  # ~0.75 on 0-1 scale (191/255)
+
+  # Minimum read coverage at a site for it to be included
+  min_coverage: 10
+
+  # FDR threshold for significant differential modification
+  fdr_threshold: 0.05
+
+  # Minimum absolute change in stoichiometry to be considered biologically relevant
+  min_delta_stoichiometry: 0.10
+
+# --- Machine Learning ---
+ml:
+  # Model type: "xgboost", "random_forest", or "both"
+  model_type: "both"
+  test_size: 0.2
+  random_state: 42
+  n_estimators: 200
+  max_depth: 6
+
+# --- Output directories ---
+output:
+  base_dir: "./results_SCL-1"
+  extraction_dir: "./results_SCL-1/01_extraction"
+  stoichiometry_dir: "./results_SCL-1/02_stoichiometry"
+  differential_dir: "./results_SCL-1/03_differential"
+  features_dir: "./results_SCL-1/04_features"
+  model_dir: "./results_SCL-1/05_model"
+  shap_dir: "./results_SCL-1/06_shap"
+  pathway_dir: "./results_SCL-1/07_pathway"
+  figures_dir: "./results_SCL-1/figures"
+
+# --- Processing ---
+processing:
+  n_jobs: 4          # Number of parallel jobs
+  chunk_size: 10000  # Reads per processing chunk (20k crashes with SIGSEGV on SCL-1)
+  verbose: true

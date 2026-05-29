@@ -1,0 +1,44 @@
+samples:
+  untreated_normoxia:
+    bam: /mnt/e/A431_normoxia/alignment/FBF64577_pass_8c806853_00000000_0.bam
+    condition: untreated
+    oxygen: normoxia
+  untreated_hypoxia:
+    bam: /mnt/e/A431_hypoxia/alignment/FBF45840_pass_88a9d1f8_00000000_0.bam
+    condition: untreated
+    oxygen: hypoxia
+comparisons:
+- control: untreated_normoxia
+  treatment: untreated_hypoxia
+modification_types:
+- code: a
+  name: m6A
+  chebi: null
+primary_modification: m6A
+reference_fasta: /mnt/c/Users/Chandhu/Downloads/epitranscriptome_project/reference/GRCh38.primary_assembly.genome.fa
+gtf_annotation: /mnt/c/Users/Chandhu/Downloads/epitranscriptome_project/reference/gencode.v47.annotation.gtf
+thresholds:
+  modification_probability: 191
+  min_coverage: 10
+  fdr_threshold: 0.05
+  min_delta_stoichiometry: 0.1
+ml:
+  model_type: both
+  test_size: 0.2
+  random_state: 42
+  n_estimators: 200
+  max_depth: 6
+output:
+  base_dir: ./results_A431
+  extraction_dir: ./results_A431/01_extraction
+  stoichiometry_dir: ./results_A431/02_stoichiometry
+  differential_dir: ./results_A431/03_differential
+  features_dir: ./results_A431/04_features
+  model_dir: ./results_A431/05_model
+  shap_dir: ./results_A431/06_shap
+  pathway_dir: ./results_A431/07_pathway
+  figures_dir: ./results_A431/figures
+processing:
+  n_jobs: 4
+  chunk_size: 50000
+  verbose: true
